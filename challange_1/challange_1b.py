@@ -15,7 +15,9 @@ class DirectedGraph:
             self.data[n1].append(n2)
 
     def __repr__(self) -> str:
-        return "\n".join(["{}: {}".format(v, i) for v, i in enumerate(self.data)])
+        return "\n".join(
+            ["{}: {}".format(v, i) for v, i in enumerate(self.data)]
+        )
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -42,7 +44,9 @@ def identify_router(edges: List[Tuple[int, int]]) -> Tuple[int]:
     graph = DirectedGraph(edges=edges)
     root = edges[0][0]
 
-    routers_total_inbound_outbound_links = [0 for _ in range(graph.max_routers + 1)]
+    routers_total_inbound_outbound_links = [
+        0 for _ in range(graph.max_routers + 1)
+    ]
     visited = [False] * len(graph.data)
 
     queue = []
@@ -56,7 +60,9 @@ def identify_router(edges: List[Tuple[int, int]]) -> Tuple[int]:
         current = queue[idx]
         idx += 1
 
-        routers_total_inbound_outbound_links[current] += len(graph.data[current])
+        routers_total_inbound_outbound_links[current] += len(
+            graph.data[current]
+        )
         # chcek for all the outbound links
         # and push the nodes into queue
         for node in graph.data[current]:
