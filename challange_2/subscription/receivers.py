@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 
+from .stripe_client import StripeClient
 from .models import StripeCustomer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -21,12 +22,10 @@ def create_stripe_customer(sender, **kwargs):
     registered user
     """
     user = kwargs["user"]
+    stripe_client = StripeClient()
     with transaction.atomic():
-        stripe_customer = stripe.Customer.create(
-            email=user.email,
-            name=user.get_full_name(),
-        )
+        stripe_customer_id = stripe_client.create_customer(user=user)
 
         StripeCustomer.objects.create(
-            user=user, customer_id=stripe_customer.id
+            user=user, customer_id=stripe_customer_id
         )

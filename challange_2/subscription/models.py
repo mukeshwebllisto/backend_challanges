@@ -1,33 +1,48 @@
+import logging
+
+from datetime import datetime
 from django.db import models
 from django.contrib.auth import get_user_model
+from stripe.api_resources.subscription import Subscription
+
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
 
-class Product(models.Model):
-    name = models.CharField(max_length=100)
-    stripe_product_id = models.CharField(max_length=100)
-    image_url = models.URLField(null=True, default=None)
-
-    def __str__(self):
-        return self.name
-
-
-class Price(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    stripe_price_id = models.CharField(max_length=100)
-    price = models.IntegerField(default=0)
-    active = models.BooleanField()
-
-
 class StripeCustomer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="stripe_customer"
+    )
     customer_id = models.CharField(max_length=32)
+
+    @classmethod
+    def _handle_subscription(
+        cls, stripe_customer_id: str, stripe_event: Subscription
+    ) -> None:
+        try:
+            stripe_customer = cls.objects.get(customer_id=stripe_customer_id)
+            StripeCustomerSubscription.objects.update_or_create(
+                customer=stripe_customer,
+                defaults={
+                    "stripe_subscription_id": stripe_event.id,
+                    "status": stripe_event.status,
+                    "cancel_at_period_end": datetime.fromtimestamp(
+                        stripe_event.current_period_end
+                    ),
+                },
+            )
+        except cls.DoesNotExist as err:
+            logger.error(
+                f"error : {err} | while handling stripe subscription event"
+            )
+            # different env issues, some customer may not exists in relative env
+            return
 
 
 class StripeCustomerSubscription(models.Model):
     customer = models.OneToOneField(StripeCustomer, on_delete=models.CASCADE)
-    stripeid = models.CharField(max_length=64)
     stripe_subscription_id = models.CharField(max_length=64)
     status = models.CharField(max_length=64)
     cancel_at_period_end = models.BooleanField(default=False)

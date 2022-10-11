@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
+</div>
+
+<div class="container">
+
+  <h3>Welcome {{request.user.get_full_name}} subscriptions page</h3>
+  {% if is_subscribed %}
+        <button type="button" class="btn btn-primary">My Subscription</button>
+        {{subscription.data.0.items}}
+        <hr>
+        <a href="{% url 'login' %}"><button type="button" class="btn btn-primary">Logout</button></a>
+  {% else %}
+        <hr>You don't have any active subscription</h4>
+        <a href="{% url 'subscription-products' %}"><button type="button" class="btn btn-primary">checkout products</button></a>
+  {% endif %}
+  <ul>
+
+  </ul>
+</div>
+{% endblock %}

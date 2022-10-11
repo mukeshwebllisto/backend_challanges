@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
+</div>
+
+<div class="container">
+
+  <h3>Welcome {{request.user.get_full_name}} products page</h3>
+  {% if products %}
+    {% for product in products %}
+        <div class="card" style="width: 25rem;">
+            <img src={{product.images.0}} class="img-fluid card-img-top" alt="Product Image">
+            <div class="card-body">
+                <h3 class="card-title font-weight-bold">{{product.name}}</h3>
+                <p class="card-text">{{product.description}}</p>
+                <hr>
+                <p class="card-text"> Price - $ {{product.amount}}</p>
+                <a href="{% url 'stripe-checkout' product.price_id %}"><button type="button" class="btn btn-primary">checkout</button></a>
+            </div>
+        </div>
+    {% endfor %}
+        <hr>
+        <button type="button" class="btn btn-primary">My Subscription</button>
+        <a href="{% url 'login' %}"><button type="button" class="btn btn-primary">Logout</button></a>
+  {% else %}
+        <hr>No active subscription available</h4>
+{% endif %}
+<a href="{% url 'my-subscriptions' %}"><button type="button" class="btn btn-primary">go back</button></a>
+  <ul>
+
+  </ul>
+</div>
+{% endblock %}
